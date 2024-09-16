@@ -16,7 +16,7 @@ jobs:
       - name: Run the build process with Docker
         run: docker build -t builder .
       - name: Run image
-        run: docker run --name test -t builder ls
+        run: docker run --name test -t builder pwd;ls
       - name: Copy log file
         run: docker cp test:/repo/log.txt ./log.txt
       - name: Upload Result
