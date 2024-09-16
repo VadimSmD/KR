@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM golang:alpine
 COPY . repo/
 WORKDIR repo
 RUN go build -o app ./cmd/app/main.go
