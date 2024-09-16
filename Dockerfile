@@ -1,6 +1,5 @@
-FROM ubuntu:22.04
+FROM 1.23.1-alpine3.20
 COPY . repo/
 WORKDIR repo
-RUN apt update
-RUN apt install -yy golang-go
-RUN go run cmd/app/main.go > log.txt
+RUN go build -o app ./cmd/app/main.go
+RUN ./app > log.txt
