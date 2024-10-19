@@ -3,7 +3,7 @@ import (
     "fmt"
     "os"
     "context"
-    "../entity/user"
+    "github.com/VadimSmD/KR/internal/repo"
 
     "github.com/jackc/pgx/v5/pgxpool"
     "github.com/doug-martin/goqu/v9"
@@ -13,15 +13,17 @@ type UserRepo struct {
     pg *pgxpool.Pool
 }
 func NewUserRepo( pg *pgxpool.Pool) UserRepo { return &UserRepo{pg} }
-
+var userTable = goqu.T("users")
 func (r *UserRepo) Insert(ctx context.Context, user entity.User) (entity.User, error) {
-    sql, args, err := r.Builder.Insert("users").Colums("user_id name surname hashed_pass nickname date_reg status").Values(user.id, user.name, user.surname, user.hashed_pass, user.nickname, user.date, user.status).ToSql()
+    sql, args, err := r.Builder.Insert(userTable).Prepared(true).Rows(user).Returning(user).ToSql()
     if err != nil {
-        return (user, fmt.Errorf("Repo - users - builder: %w", err))
+        return user, fmt.Errorf("Repo - users - builder: %w", err)
     }
-    _, err = r.Pool.Exec(ctx, sql, args)
+    rows, err = r.Pool.Query(ctx, sql, args...)
     if err != nil {
         return (user, fmt.Errorf("Repo -user - exec: %w", err))
     }
-    return (user, nil)
+    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
+    if err != nil {return user, fmt.Errorf("user.go - newuserrepo - collect: %w", err)}
+    return response, nil
 }

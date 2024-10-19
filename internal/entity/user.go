@@ -2,11 +2,11 @@ package entity
 
 
 type User struct {
-    id int
-    name string
-    surname string
-    nickname string
-    date string
-    hashed_pass string
-    status string
+    Id int64 'db:"id" goqu:"skipinsert"'
+    Name string 'db:"name"'
+    Surname string 'db:"surname"'
+    Nickname string 'db:"nickname"'
+    Date time.Time 'goqu:"skipinsert"'
+    Hashed_pass string 'db:"hashed_pass"'
+    Status *string 'db:"status"'
 }

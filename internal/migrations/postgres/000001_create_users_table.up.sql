@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS users (
     surname VARCHAR (50) NOT NULL,
     hashed_pass VARCHAR (300) NOT NULL,
     nickname VARCHAR (50) UNIQUE NOT NULL,
-    date_reg VARCHAR (50) UNIQUE NOT NULL,
+    date_reg timestamp with timezone NOT NULL default now(),
     status VARCHAR (300) NOT NULL
 );

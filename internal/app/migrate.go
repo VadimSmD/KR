@@ -19,13 +19,9 @@ const (
 	_defaultTimeout  = time.Second
 )
 
-func main() {
-	databaseURL, ok := os.LookupEnv("PG_URL")
-	if !ok || len(databaseURL) == 0 {
-		log.Fatalf("migrate: environment variable not declared: PG_URL")
-	}
+func migrate(databaseURL string) {
 
-//	databaseURL += "?sslmode=disable"
+	//	databaseURL += "?sslmode=disable"
 
 	var (
 		attempts = _defaultAttempts
@@ -61,4 +57,10 @@ func main() {
 
 	log.Printf("Migrate: up success")
 }
-
+func main() {
+	path, ok := os.LookupEnv("PG_URL")
+	if !ok || len(path) == 0 {
+		log.Fatalf("migrate: environment variable not declared: PG_URL")
+	}
+	migrate(path)
+}
