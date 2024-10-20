@@ -45,17 +45,31 @@ func (r *UserRepo) Edit(ctx context.Context, user entity.User) (entity.User, err
     return response, nil
 }
 
-func (r *UserRepo) Get(ctx context.Context, user_id int) () {
-	sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"id":user_id}).Returning(user).ToSql()
-    if err != nil {
-        return user, fmt.Errorf("Repo - users - get: %w", err)
-    }
-    rows, err = r.Pool.Query(ctx, sql, args...)
-    if err != nil {
-        return (user, fmt.Errorf("Repo -user - get_exec: %w", err))
-    }
-    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
-    if err != nil {return user, fmt.Errorf("user.go - get_user - collect: %w", err)}
-    return response, nil
-}
+func (r *UserRepo) Get(ctx context.Context, login string, hashed_pass string) (entity.User, error, bool) {
+	if hashed_pass != "" {
+		sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"nickname":login, "hashed_pass":hashed_pass}).Returning(user).ToSql()
+		if err != nil {
+	        return user, fmt.Errorf("Repo - users - auth: %w", err, false)
+	    }
+	    rows, err = r.Pool.Query(ctx, sql, args...)
+	    if err != nil {
+	        return (user, fmt.Errorf("Repo -user - auth_exec: %w", err, false))
+	    }
+	    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
+	    if err != nil {return user, fmt.Errorf("user.go - get - auth_res: %w", err, false)}
+	    return response, nil, true
+	} else {
+		sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"nickname":login}).Returning(user).ToSql()
+		if err != nil {
+	        return user, fmt.Errorf("Repo - users - get: %w", err, false)
+	    }
+	    rows, err = r.Pool.Query(ctx, sql, args...)
+	    if err != nil {
+	        return (user, fmt.Errorf("Repo -user - get_exec: %w", err, false))
+	    }
+	    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
+	    if err != nil {return user, fmt.Errorf("user.go - get - get_res: %w", err, false)}
+	    return response, nil, false
+	}
+	
 }
