@@ -12,6 +12,13 @@ import (
 type UserRepo struct {
     pg *pgxpool.Pool
 }
+
+type PartialIdent struct {
+	user_id int
+	nickname string
+	hashedp string
+}
+
 func NewUserRepo( pg *pgxpool.Pool) UserRepo { return &UserRepo{pg} }
 var userTable = goqu.T("users")
 
@@ -45,31 +52,41 @@ func (r *UserRepo) Edit(ctx context.Context, user entity.User) (entity.User, err
     return response, nil
 }
 
-func (r *UserRepo) Get(ctx context.Context, login string, hashed_pass string) (entity.User, error, bool) {
-	if hashed_pass != "" {
-		sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"nickname":login, "hashed_pass":hashed_pass}).Returning(user).ToSql()
-		if err != nil {
-	        return user, fmt.Errorf("Repo - users - auth: %w", err, false)
-	    }
-	    rows, err = r.Pool.Query(ctx, sql, args...)
-	    if err != nil {
-	        return (user, fmt.Errorf("Repo -user - auth_exec: %w", err, false))
-	    }
-	    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
-	    if err != nil {return user, fmt.Errorf("user.go - get - auth_res: %w", err, false)}
-	    return response, nil, true
-	} else {
-		sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"nickname":login}).Returning(user).ToSql()
-		if err != nil {
-	        return user, fmt.Errorf("Repo - users - get: %w", err, false)
-	    }
-	    rows, err = r.Pool.Query(ctx, sql, args...)
-	    if err != nil {
-	        return (user, fmt.Errorf("Repo -user - get_exec: %w", err, false))
-	    }
-	    response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
-	    if err != nil {return user, fmt.Errorf("user.go - get - get_res: %w", err, false)}
-	    return response, nil, false
+func (r *UserRepo) GetById(ctx context.Context, user_id int) (entity.User, error) {
+	sql, args, err := r.Builder.Select(userTable).Where(goqu.Ex{"id": user_id}).Returning(user).ToSql()
+	if err != nil {
+	    return user, fmt.Errorf("Repo - users - get: %w", err)
 	}
+	rows, err = r.Pool.Query(ctx, sql, args...)
+	if err != nil {
+	    return (user, fmt.Errorf("Repo -user - get_exec: %w", err))
+	}
+	response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
+	if err != nil {return user, fmt.Errorf("user.go - get - get_res: %w", err)}
+	return response, nil
 	
+}
+
+func (r * UserRepo) GetByIdent (ctx context.Context, ident PartialIdent) (entity.User, error) {
+	whereOpts := make([]goqu.Expression, 0, 3)
+	if ident.nickname != "" {
+		whereOpts = append(whereOpts, userTable.Col("login").Eq(ident.nickname))
+	}
+	if ident.hashedp != "" {
+		whereOpts = append(whereOpts, userTable.Col("hashed_pass").Eq(ident.hashedp))
+	}
+	if ident.user_id != "" {
+		whereOpts = append(whereOpts, userTable.Col("id").Eq(ident.user_id))
+	}
+	sql, args, err := r.Builder.Select(userTable).Where(whereOpts).Returning(user).ToSql()
+	if err != nil {
+	    return user, fmt.Errorf("Repo - users - getIdent: %w", err)
+	}
+	rows, err = r.Pool.Query(ctx, sql, args...)
+	if err != nil {
+	    return (user, fmt.Errorf("Repo -user - getIdent_exec: %w", err))
+	}
+	response, err := pgx.CollectOneRow(rows, pgx.CollectByName[entity.user])
+	if err != nil {return user, fmt.Errorf("user.go - get - getIdent_res: %w", err)}
+	return response, nil
 }
