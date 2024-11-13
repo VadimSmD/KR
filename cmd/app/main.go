@@ -2,7 +2,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-	openapi "github.com/VadimSmD/KR/internal/openapi"
+	userapi "github.com/VadimSmD/KR/internal/repo/userapi"
 	
 )
 
