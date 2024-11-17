@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-
-	controller "github.com/VadimSmD/KR/internal/user_controller.go"
+	controller "github.com/VadimSmD/KR/internal"
 )
 
 func main() {
-	userController := &UserController{}
+	userController := &controller.UserController{}
 	http.HandleFunc("/users", userController)
 	if err != nil {
 		log.Fatal(err)
