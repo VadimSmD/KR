@@ -1,16 +1,15 @@
 package main
+
 import (
 	"fmt"
 	"net/http"
-	userapi "github.com/VadimSmD/KR/internal/repo/userapi"
-	
+
+	controller "github.com/VadimSmD/KR/internal/user_controller.go"
 )
 
 func main() {
-	service := $UserRepo{
-		users:map[int64]openapi.User{},
-	}
-	srv, err := openapi.NewServer(service)
+	userController := &UserController{}
+	http.HandleFunc("/users", userController)
 	if err != nil {
 		log.Fatal(err)
 	}
