@@ -1,6 +1,4 @@
-//go:build migrate
-
-package main
+package app
 
 import (
 	"errors"

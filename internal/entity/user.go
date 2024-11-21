@@ -1,5 +1,9 @@
 package entity
 
+import (
+	"time"
+)
+
 type User struct {
 	Id         int64     `db:"id" goqu:"skipinsert"`
 	Name       string    `db:"name"`
