@@ -14,6 +14,12 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
+
+tags:
+  - name: user
+    description: Методы для работы с пользователями
+  - name: message
+
 paths:
   /user:
     post:
@@ -22,34 +28,29 @@ paths:
       summary: Create user
       description: This can only be done by the logged in user.
       operationId: createUser
+      x-ogen-operation-group: user
       requestBody:
-        description: Created user object
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CreateUserRequest'
       responses:
-        default:
+        200:
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/default'
   /user/createWithList:
     post:
       tags:
         - user
       summary: Creates list of users with given input array
       description: Creates list of users with given input array
+      x-ogen-operation-group: user
       operationId: createUsersWithListInput
       requestBody:
         content:
@@ -69,12 +70,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         default:
-          description: successful operation
+          $ref: '#/components/responses/default'
   /user/login:
     get:
       tags:
         - user
       summary: Logs user into the system
+      x-ogen-operation-group: user
       description: ''
       operationId: loginUser
       parameters:
@@ -113,23 +115,29 @@ paths:
                 type: string
         '400':
           description: Invalid username/password supplied
+        default:
+          $ref: '#/components/responses/default'
   /user/logout:
     get:
       tags:
         - user
       summary: Logs out current logged in user session
       description: ''
+      x-ogen-operation-group: user
       operationId: logoutUser
       parameters: []
       responses:
-        default:
+        200:
           description: successful operation
+        default:
+          $ref: '#/components/responses/default'
   /user/{username}:
     get:
       tags:
         - user
       summary: Get user by user name
       description: ''
+      x-ogen-operation-group: user
       operationId: getUserByName
       parameters:
         - name: username
@@ -152,11 +160,14 @@ paths:
           description: Invalid username supplied
         '404':
           description: User not found
+        default:
+          $ref: '#/components/responses/default'
     put:
       tags:
         - user
       summary: Update user
       description: This can only be done by the logged in user.
+      x-ogen-operation-group: user
       operationId: updateUser
       parameters:
         - name: username
@@ -178,13 +189,16 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        default:
+        200:
           description: successful operation
+        default:
+          $ref: '#/components/responses/default'
     delete:
       tags:
         - user
       summary: Delete user
       description: This can only be done by the logged in user.
+      x-ogen-operation-group: user
       operationId: deleteUser
       parameters:
         - name: username
@@ -200,10 +214,32 @@ paths:
           description: Invalid username supplied
         '404':
           description: User not found
+        default:
+          $ref: '#/components/responses/default'
 components:
   schemas:
+    UnsuccessfulResponse:
+      type: object
+      required: [ msg ]
+      properties:
+        msg:
+          type: string
+    CreateUserRequest:
+      required: [nickname, name, surname, hashedPass]
+      type: object
+      properties:
+        nickname:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        hashedPass:
+          type: string
+
     User:
       type: object
+      required: [id, nickname, name, surname, userStatus, date]
       properties:
         id:
           type: integer
@@ -223,3 +259,66 @@ components:
           format: date
       xml:
         name: user
+
+  responses:
+    '400':
+      description: 'Ошибка валидации/чтения запроса'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          examples:
+            bind:
+              summary: Bind Example
+              value: { "msg": "bind" }
+            validate:
+              summary: Validate Example
+              value: { "msg": "validate" }
+
+    '401':
+      description: 'Ошибка авторизации'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "unauthorized" }
+
+    '402':
+      description: 'Превышен лимит создания источников'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "limit exceeded" }
+
+    '403':
+      description: 'Ошибка проверки прав доступа'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "access forbidden" }
+
+    '404':
+      description: 'Объект не найден'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "not found" }
+
+    '423':
+      description: 'Данная операция не доступна для указанного ресурса'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "resource locked" }
+
+    default:
+      description: 'Внутренняя ошибка сервиса'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsuccessfulResponse'
+          example: { "msg": "internal" }

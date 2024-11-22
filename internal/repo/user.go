@@ -1,14 +1,15 @@
-package logic
+package repo
 
 import (
 	"context"
 	"fmt"
 
-	entity "github.com/VadimSmD/KR/internal/entity"
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/VadimSmD/KR/internal/entity"
 )
 
 type UserRepo struct {
@@ -48,7 +49,9 @@ func (r *UserRepo) Delete(ctx context.Context, userId int) error {
 	if err != nil {
 		return fmt.Errorf("Repo - users - delete: %w", err)
 	}
-	r.pg.Query(ctx, sql, args...)
+	if _, err = r.pg.Exec(ctx, sql, args...); err != nil {
+		return fmt.Errorf("Repo - users - delete: %w", err)
+	}
 	return nil
 }
 

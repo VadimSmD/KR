@@ -1,16 +1,28 @@
 package main
 
 import (
-	controller "github.com/VadimSmD/KR/internal"
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	userController := &controller.UserController{}
-	http.HandleFunc("/users", userController)
+	env, err := newEnvironment()
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := http.ListenAndServe(":8080", srv); err != nil {
+	app, err := newApp(context.TODO(), env)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancelFunc := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt, syscall.SIGTERM)
+	defer cancelFunc()
+
+	<-app.run(ctx)
+	if err := app.shutdown(context.TODO()); err != nil {
 		log.Fatal(err)
 	}
 }
