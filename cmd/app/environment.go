@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -16,7 +17,8 @@ type (
 )
 
 func newEnvironment() (environment, error) {
-	var env environment
+	pg := Postgres{DSN: os.Getenv("PG_URL")}
+	env := environment{Postgres: pg}
 	if err := cleanenv.ReadEnv(&env); err != nil {
 		return environment{}, fmt.Errorf("newEnvironment: %w", err)
 	}

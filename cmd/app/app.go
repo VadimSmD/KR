@@ -8,12 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	"github.com/VadimSmD/KR/gen/oas"
 	"github.com/VadimSmD/KR/internal/controller"
 	"github.com/VadimSmD/KR/internal/repo"
 	"github.com/VadimSmD/KR/internal/service"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type app struct {
