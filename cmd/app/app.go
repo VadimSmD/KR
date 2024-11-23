@@ -30,7 +30,7 @@ func newApp(ctx context.Context, env environment) (*app, error) {
 	userHandler := controller.NewUserController(userService)
 
 	handler := &Handler{
-		UserHandler: userHandler,
+		UserHandler: userHandler.UserHandler,
 	}
 	ogenServer, err := oas.NewServer(handler)
 	if err != nil {

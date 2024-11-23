@@ -17,7 +17,7 @@ const (
 	_defaultTimeout  = time.Second
 )
 
-func migrate(databaseURL string) {
+func migrates(databaseURL string) {
 
 	//	databaseURL += "?sslmode=disable"
 
@@ -60,5 +60,5 @@ func main() {
 	if !ok || len(path) == 0 {
 		log.Fatalf("migrate: environment variable not declared: PG_URL")
 	}
-	migrate(path)
+	migrates(path)
 }
